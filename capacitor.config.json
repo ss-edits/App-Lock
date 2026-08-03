@@ -1,8 +1,7 @@
 {
   "appId": "com.applock.secure",
   "appName": "App Lock",
-  "webDir": ".",
-  "bundledWebRuntime": false,
+  "webDir": "www",
   "server": {
     "androidScheme": "https"
   }

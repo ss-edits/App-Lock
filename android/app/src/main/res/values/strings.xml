@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">App Lock</string>
+    <string name="title_activity_main">App Lock</string>
+    <string name="package_name">com.applock.secure</string>
+    <string name="custom_url_scheme">com.applock.secure</string>
+</resources>

@@ -1,0 +1,20 @@
+{
+  "name": "App Lock & Secure Media Vault",
+  "short_name": "App Lock",
+  "description": "The ultimate zero-data-snooping security suite. Protect your applications with independent passcodes, invisible pattern paths, biometrics, and an offline AES-256 encrypted photo and video vault.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#0A0A0E",
+  "theme_color": "#0071E3",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><defs><linearGradient id='grad' x1='0%' y1='0%' x2='100%' y2='100%'><stop offset='0%' style='stop-color:%230071E3;stop-opacity:1' /><stop offset='50%' style='stop-color:%2300C7FF;stop-opacity:1' /><stop offset='100%' style='stop-color:%238A53FF;stop-opacity:1' /></linearGradient></defs><rect width='512' height='512' rx='128' fill='%230A0A0E'/><path d='M352 224H160c-26.5 0-48 21.5-48 48v160c0 26.5 21.5 48 48 48h192c26.5 0 48-21.5 48-48V272c0-26.5-21.5-48-48-48z' fill='url(%23grad)'/><path d='M256 96c-53 0-96 43-96 96v32h192v-32c0-53-43-96-96-96z' fill='none' stroke='%2300C7FF' stroke-width='40' stroke-linecap='round'/><circle cx='256' cy='330' r='24' fill='%23FFFFFF'/><path d='M256 348v42' stroke='%23FFFFFF' stroke-width='20' stroke-linecap='round'/></svg>",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["security", "utilities", "privacy"],
+  "prefer_related_applications": false
+}
