@@ -221,11 +221,16 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">Protected Applications</h2>
-          <p class="section-desc">Toggle zero-delay App Lock protection or assign independent passwords, patterns, and biometrics to individual apps.</p>
+          <p class="section-desc">Lock any application installed on your device with custom PINs, Patterns, Passwords, or Biometrics.</p>
         </div>
-        <button class="btn-secondary" onclick="document.querySelector('[data-view=\'sandbox\']').click();">
-          Open App Launcher ➔
-        </button>
+        <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+          <button id="btn-open-add-app" class="btn-primary" style="background: linear-gradient(135deg, #00C7FF, #8A53FF);">
+            ➕ Lock New App
+          </button>
+          <button class="btn-secondary" onclick="document.querySelector('[data-view=\'sandbox\']').click();">
+            Open App Launcher ➔
+          </button>
+        </div>
       </div>
 
       <div id="apps-grid" class="apps-grid">
@@ -566,6 +571,57 @@
   <div id="media-viewer-modal" class="media-viewer-modal">
     <button id="btn-close-viewer" class="btn-close-viewer">✕</button>
     <div id="viewer-content-box" class="viewer-content-box"></div>
+  </div>
+
+  <!-- Add New Application to Lock Modal -->
+  <div id="add-app-modal" class="modal-overlay">
+    <div class="lock-interception-card" style="align-items: stretch; max-width: 440px;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 14px; margin-bottom: 18px;">
+        <h3 style="font-family: var(--font-heading); font-size: 22px; color: #FFF; margin: 0;">➕ Lock New Application</h3>
+        <button id="btn-close-add-app" class="btn-secondary" style="padding: 4px 10px; font-size: 12px;">✕</button>
+      </div>
+
+      <form id="form-add-app" style="display: flex; flex-direction: column; gap: 14px;">
+        <div>
+          <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Application Name:</label>
+          <input type="text" id="add-app-name" class="glass-input" placeholder="e.g. Facebook, Snapchat, Paytm, Photos..." required>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Category:</label>
+            <select id="add-app-category" class="glass-input" style="background: #111422;">
+              <option value="Social">Social</option>
+              <option value="Finance">Finance</option>
+              <option value="Messaging">Messaging</option>
+              <option value="Media">Media & Photos</option>
+              <option value="Gaming">Gaming</option>
+              <option value="Productivity">Productivity</option>
+              <option value="System">System</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Icon Emoji / Badge:</label>
+            <input type="text" id="add-app-icon" class="glass-input" value="📱" placeholder="📱" required style="text-align: center;">
+          </div>
+        </div>
+
+        <div>
+          <label style="font-size: 12px; font-weight: 600; color: var(--text-secondary); margin-bottom: 6px; display: block;">Lock Method:</label>
+          <select id="add-app-locktype" class="glass-input" style="background: #111422;">
+            <option value="pin">PIN Lock (Numeric Keypad)</option>
+            <option value="pattern">3x3 Canvas Pattern Lock</option>
+            <option value="password">Alphanumeric Password</option>
+            <option value="biometrics">Biometric & Face ID Unlock</option>
+          </select>
+        </div>
+
+        <div style="display: flex; justify-content: flex-end; gap: 12px; margin-top: 8px;">
+          <button type="button" id="btn-cancel-add-app" class="btn-secondary">Cancel</button>
+          <button type="submit" class="btn-primary" style="background: linear-gradient(135deg, #00C7FF, #8A53FF);">🔒 Lock This App</button>
+        </div>
+      </form>
+    </div>
   </div>
 
   <!-- Native App Download & APK Package Modal -->

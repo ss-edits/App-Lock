@@ -189,6 +189,61 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* ==========================================================================
+     Lock New Application Form & Modal Handlers
+     ========================================================================== */
+  const addAppModal = document.getElementById('add-app-modal');
+  const btnOpenAddApp = document.getElementById('btn-open-add-app');
+  const btnCloseAddApp = document.getElementById('btn-close-add-app');
+  const btnCancelAddApp = document.getElementById('btn-cancel-add-app');
+  const formAddApp = document.getElementById('form-add-app');
+
+  if (btnOpenAddApp) {
+    btnOpenAddApp.onclick = () => {
+      document.getElementById('add-app-name').value = '';
+      if (addAppModal) addAppModal.classList.add('active-modal');
+    };
+  }
+
+  const closeAddAppModal = () => {
+    if (addAppModal) addAppModal.classList.remove('active-modal');
+  };
+  if (btnCloseAddApp) btnCloseAddApp.onclick = closeAddAppModal;
+  if (btnCancelAddApp) btnCancelAddApp.onclick = closeAddAppModal;
+
+  if (formAddApp) {
+    formAddApp.onsubmit = (e) => {
+      e.preventDefault();
+      const name = document.getElementById('add-app-name').value.trim();
+      const category = document.getElementById('add-app-category').value;
+      const icon = document.getElementById('add-app-icon').value.trim() || '🔒';
+      const lockType = document.getElementById('add-app-locktype').value;
+
+      if (!name) return;
+
+      const newId = 'custom_app_' + Date.now();
+      const presetColors = ['#0071E3', '#00C7FF', '#8A53FF', '#E1306C', '#34C759', '#FF9F0A', '#EA4335', '#25D366'];
+      const randomColor = presetColors[Math.floor(Math.random() * presetColors.length)];
+
+      appConfigs[newId] = {
+        id: newId,
+        name: name,
+        category: category,
+        icon: icon,
+        color: randomColor,
+        locked: true,
+        lockType: lockType,
+        invisiblePattern: false
+      };
+
+      saveConfigs();
+      closeAddAppModal();
+      renderAppProtectionList();
+      renderSandboxLauncher();
+      showNotification(`🔒 Protection enabled for ${name}!`, 'success');
+    };
+  }
+
+  /* ==========================================================================
      Interactive OS Sandbox Launcher & ZERO-DELAY Lock Interceptor
      ========================================================================== */
   const phoneHomeScreen = document.getElementById('phone-home-screen');
@@ -211,6 +266,19 @@ document.addEventListener('DOMContentLoaded', async () => {
       iconDiv.addEventListener('click', () => triggerAppLaunch(app.id));
       phoneHomeScreen.appendChild(iconDiv);
     });
+
+    const addTile = document.createElement('div');
+    addTile.className = 'launcher-icon';
+    addTile.innerHTML = `
+      <div class="icon-glyph" style="background: linear-gradient(135deg, #00C7FF, #8A53FF); border: 2px dashed #FFF;">➕</div>
+      <div class="launcher-label">Lock App</div>
+    `;
+    addTile.addEventListener('click', () => {
+      document.getElementById('add-app-name').value = '';
+      const addAppModal = document.getElementById('add-app-modal');
+      if (addAppModal) addAppModal.classList.add('active-modal');
+    });
+    phoneHomeScreen.appendChild(addTile);
   }
 
   function triggerAppLaunch(appId) {
