@@ -15,8 +15,6 @@ jobs:
     steps:
     - name: Checkout Code
       uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
 
     - name: Set up JDK 17
       uses: actions/setup-java@v4
@@ -46,13 +44,6 @@ jobs:
       with:
         name: AppLock-Android-APK
         path: AppLock.apk
-
-    - name: Create & Push Git Tag
-      run: |
-        git config user.name "github-actions[bot]"
-        git config user.email "github-actions[bot]@users.noreply.github.com"
-        git tag -f "v1.0.${{ github.run_number }}"
-        git push -f origin "v1.0.${{ github.run_number }}"
 
     - name: Create Official GitHub Release
       uses: ncipollo/release-action@v1
