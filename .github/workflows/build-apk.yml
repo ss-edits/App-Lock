@@ -27,8 +27,11 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Install Dependencies & Sync
+    - name: Prepare Web Assets & Install Dependencies
       run: |
+        mkdir -p www
+        cp index.html styles.css manifest.json sw.js www/ || true
+        cp -r js www/ || true
         npm install
         npx cap sync android
 
@@ -46,13 +49,13 @@ jobs:
         path: AppLock.apk
 
     - name: Create Official GitHub Release
-      uses: ncipollo/release-action@v1
+      uses: softprops/action-gh-release@v2
       with:
-        artifacts: "AppLock.apk"
-        tag: "v1.0.${{ github.run_number }}"
+        tag_name: "v1.0.${{ github.run_number }}"
         name: "App Lock Native APK v1.0.${{ github.run_number }}"
         body: |
           🚀 Direct 1-click download link for App Lock native Android APK.
           Download AppLock.apk directly to your phone and tap to install!
-        token: ${{ secrets.GITHUB_TOKEN }}
-        allowUpdates: true
+        files: AppLock.apk
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
