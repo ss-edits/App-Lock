@@ -30,22 +30,24 @@ document.addEventListener('DOMContentLoaded', async () => {
   /* ==========================================================================
      PWA Offline Install & Download Handler
      ========================================================================== */
-  const downloadBtn = document.getElementById('btn-pwa-install');
-  if (downloadBtn) {
-    downloadBtn.onclick = () => {
-      if (deferredInstallPrompt) {
-        deferredInstallPrompt.prompt();
-        deferredInstallPrompt.userChoice.then((choice) => {
-          if (choice.outcome === 'accepted') {
-            showNotification('App Lock installed successfully to Home Screen!', 'success');
-          }
-          deferredInstallPrompt = null;
-        });
-      } else {
-        alert("🛡️ DOWNLOAD / INSTALL APP LOCK PWA\n\nTo install App Lock as an offline standalone application on your device:\n\n📱 Android (Chrome / Edge): Tap your browser's menu (3 dots at top right) and select 'Install App' or 'Add to Home screen'.\n\n🍏 iPhone / iPad (Safari): Tap the Share icon (box with arrow) at the bottom of Safari and select 'Add to Home Screen'.\n\n💻 Desktop (Chrome / Edge): Click the install icon inside your URL address bar!");
-      }
-    };
-  }
+  const triggerInstall = () => {
+    if (deferredInstallPrompt) {
+      deferredInstallPrompt.prompt();
+      deferredInstallPrompt.userChoice.then((choice) => {
+        if (choice.outcome === 'accepted') {
+          showNotification('App Lock installed successfully to Home Screen!', 'success');
+        }
+        deferredInstallPrompt = null;
+      });
+    } else {
+      alert("🛡️ DOWNLOAD / INSTALL APP LOCK PWA\n\nTo install App Lock as an offline standalone application on your device:\n\n📱 Android (Chrome / Edge): Tap your browser's menu (3 dots at top right) and select 'Install App' or 'Add to Home screen'.\n\n🍏 iPhone / iPad (Safari): Tap the Share icon (box with arrow) at the bottom of Safari and select 'Add to Home Screen'.\n\n💻 Desktop (Chrome / Edge): Click the install icon inside your URL address bar!");
+    }
+  };
+
+  const btnNav = document.getElementById('btn-pwa-install');
+  const btnHero = document.getElementById('hero-btn-pwa-install');
+  if (btnNav) btnNav.onclick = triggerInstall;
+  if (btnHero) btnHero.onclick = triggerInstall;
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();

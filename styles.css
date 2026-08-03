@@ -113,7 +113,9 @@ header.navbar {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 20px 0;
+  flex-wrap: wrap;
+  gap: 16px;
+  padding: 16px 0;
   border-bottom: 1px solid var(--border-glass);
   margin-bottom: 32px;
   position: sticky;
@@ -121,7 +123,7 @@ header.navbar {
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   z-index: 50;
-  background: rgba(9, 10, 15, 0.75);
+  background: rgba(9, 10, 15, 0.88);
 }
 
 .logo-container {
@@ -225,6 +227,8 @@ header.navbar {
   display: flex;
   align-items: center;
   gap: 12px;
+  flex-shrink: 0;
+  min-width: max-content;
 }
 
 .btn-primary {
