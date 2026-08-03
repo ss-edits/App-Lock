@@ -33,6 +33,12 @@
 
         </activity>
 
+        <service
+            android:name=".AppLockService"
+            android:enabled="true"
+            android:exported="false"
+            android:foregroundServiceType="specialUse" />
+
         <provider
             android:name="androidx.core.content.FileProvider"
             android:authorities="${applicationId}.fileprovider"
