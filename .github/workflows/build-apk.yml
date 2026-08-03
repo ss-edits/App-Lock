@@ -25,7 +25,7 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
 
     - name: Prepare Web Assets & Install Dependencies
       run: |
@@ -49,13 +49,12 @@ jobs:
         path: AppLock.apk
 
     - name: Create Official GitHub Release
-      uses: softprops/action-gh-release@v2
+      uses: ncipollo/release-action@v1
       with:
-        tag_name: "v1.0.${{ github.run_number }}"
+        tag: "v1.0.${{ github.run_number }}"
         name: "App Lock Native APK v1.0.${{ github.run_number }}"
         body: |
           🚀 Direct 1-click download link for App Lock native Android APK.
           Download AppLock.apk directly to your phone and tap to install!
-        files: AppLock.apk
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        artifacts: "AppLock.apk"
+        token: ${{ secrets.GITHUB_TOKEN }}

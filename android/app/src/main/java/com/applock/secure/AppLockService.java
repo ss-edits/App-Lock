@@ -61,7 +61,7 @@ public class AppLockService extends Service {
             if (lockedPackages.contains(currentPackage) || isDefaultLockedPackage(currentPackage)) {
                 lastForegroundPackage = currentPackage;
                 Intent lockIntent = new Intent(this, MainActivity.class);
-                lockIntent.addFlags(Intent.ACTION_MAIN);
+                lockIntent.setAction(Intent.ACTION_MAIN);
                 lockIntent.addCategory(Intent.CATEGORY_LAUNCHER);
                 lockIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_REORDER_TO_FRONT | Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 lockIntent.putExtra("LOCKED_PACKAGE", currentPackage);
