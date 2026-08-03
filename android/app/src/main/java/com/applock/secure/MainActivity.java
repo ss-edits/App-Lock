@@ -9,7 +9,7 @@ import com.getcapacitor.BridgeActivity;
 public class MainActivity extends BridgeActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate();
+        super.onCreate(savedInstanceState);
         startNativeAppLockService();
         handleLockIntent(getIntent());
     }
