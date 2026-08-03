@@ -389,13 +389,149 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('viewer-app-name').innerText = app.name;
     document.getElementById('viewer-app-icon-badge').innerText = app.icon;
     document.getElementById('viewer-app-icon-badge').style.backgroundColor = app.color;
-    document.getElementById('viewer-dummy-content').innerHTML = `
-      <div style="padding: 40px; text-align: center; color: var(--text-secondary);">
-        <div style="font-size: 48px; margin-bottom: 16px;">${app.icon}</div>
-        <h3 style="color: #FFF; font-family: var(--font-heading); margin-bottom: 8px;">Welcome to ${app.name}</h3>
-        <p>You have successfully unlocked this secure environment. All actions inside remain protected by App Lock.</p>
-      </div>
-    `;
+    
+    const container = document.getElementById('viewer-dummy-content');
+
+    if (app.id === 'whatsapp') {
+      let savedNotes = JSON.parse(localStorage.getItem('applock_wa_notes') || '["🔒 Encrypted Note: Keep recovery passcode safe", "🔑 Vault PIN set to 2026"]');
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; height: 440px; background: #0B141A; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
+          <div style="background: #202C33; padding: 14px 18px; display: flex; align-items: center; gap: 12px;">
+            <div style="width: 40px; height: 40px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; font-size: 20px;">💬</div>
+            <div>
+              <h4 style="color: #FFF; font-size: 16px; margin: 0;">Secured Private Notes</h4>
+              <span style="color: #00A884; font-size: 12px;">● End-to-End Encrypted</span>
+            </div>
+          </div>
+          <div id="wa-notes-list" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
+            ${savedNotes.map(n => `<div style="background: #005C4B; color: #E9EDEF; padding: 10px 14px; border-radius: 12px 12px 0 12px; max-width: 80%; align-self: flex-end; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${n}</div>`).join('')}
+          </div>
+          <div style="background: #202C33; padding: 12px; display: flex; gap: 10px;">
+            <input type="text" id="wa-input" class="glass-input" placeholder="Type a secure note or chat message..." style="font-size: 14px; padding: 10px 14px;">
+            <button id="wa-send-btn" class="btn-primary" style="padding: 10px 18px; background: #00A884;">Send</button>
+          </div>
+        </div>
+      `;
+      setTimeout(() => {
+        const sendBtn = document.getElementById('wa-send-btn');
+        const inputEl = document.getElementById('wa-input');
+        const listEl = document.getElementById('wa-notes-list');
+        sendBtn.onclick = () => {
+          if (!inputEl.value.trim()) return;
+          savedNotes.push(inputEl.value.trim());
+          localStorage.setItem('applock_wa_notes', JSON.stringify(savedNotes));
+          const msgDiv = document.createElement('div');
+          msgDiv.style.cssText = 'background: #005C4B; color: #E9EDEF; padding: 10px 14px; border-radius: 12px 12px 0 12px; max-width: 80%; align-self: flex-end; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);';
+          msgDiv.innerText = inputEl.value.trim();
+          listEl.appendChild(msgDiv);
+          inputEl.value = '';
+          listEl.scrollTop = listEl.scrollHeight;
+        };
+      }, 50);
+    } 
+    else if (app.id === 'banking') {
+      let balance = parseFloat(localStorage.getItem('applock_bank_bal') || '48250.00');
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 18px; color: #FFF;">
+          <div style="background: linear-gradient(135deg, #0071E3, #00C7FF); padding: 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,113,227,0.4);">
+            <span style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8;">Total Net Worth Balance</span>
+            <h2 id="bank-bal-text" style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; margin: 8px 0 4px;">$${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}</h2>
+            <span style="font-size: 12px; opacity: 0.9;">Account: **** **** **** 8829 (Checking)</span>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px;">
+            <h4 style="margin-bottom: 12px; font-size: 15px;">Quick Money Transfer</h4>
+            <div style="display: flex; gap: 10px;">
+              <input type="number" id="bank-transfer-amt" class="glass-input" placeholder="Amount ($)..." style="font-size: 14px; padding: 10px;">
+              <button id="bank-send-btn" class="btn-primary" style="padding: 10px 18px;">Transfer</button>
+            </div>
+          </div>
+
+          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px;">
+            <h4 style="margin-bottom: 10px; font-size: 15px;">Recent Activity</h4>
+            <div id="bank-tx-list" style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--text-secondary);">
+              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
+                <span>Apple Store Purchase</span>
+                <span style="color: var(--color-danger); font-weight: 700;">-$299.00</span>
+              </div>
+              <div style="display: flex; justify-content: space-between; padding: 8px 0;">
+                <span>Payroll Direct Deposit</span>
+                <span style="color: var(--color-success); font-weight: 700;">+$3,500.00</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      `;
+      setTimeout(() => {
+        const sendBtn = document.getElementById('bank-send-btn');
+        const amtInput = document.getElementById('bank-transfer-amt');
+        sendBtn.onclick = () => {
+          const val = parseFloat(amtInput.value);
+          if (isNaN(val) || val <= 0) return;
+          balance -= val;
+          localStorage.setItem('applock_bank_bal', balance.toString());
+          document.getElementById('bank-bal-text').innerText = `$${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
+          showNotification(`Transferred $${val.toFixed(2)} successfully!`, 'success');
+          amtInput.value = '';
+        };
+      }, 50);
+    }
+    else if (app.id === 'gallery') {
+      container.innerHTML = `
+        <div style="display: flex; flex-direction: column; gap: 16px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <h4 style="color: #FFF; margin: 0;">Secured Photos (3 Albums)</h4>
+            <button class="btn-secondary" onclick="document.querySelector('[data-view=\'vault\']').click(); document.getElementById('btn-close-app-viewer').click();" style="font-size: 12px; padding: 6px 14px;">Open Vault ➔</button>
+          </div>
+          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
+            <div style="background: linear-gradient(135deg, #FF9F0A, #FF3B30); height: 120px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #FFF; box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer;">🏝️</div>
+            <div style="background: linear-gradient(135deg, #0071E3, #00C7FF); height: 120px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #FFF; box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer;">🏎️</div>
+            <div style="background: linear-gradient(135deg, #8A53FF, #E1306C); height: 120px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #FFF; box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer;">📸</div>
+          </div>
+        </div>
+      `;
+    }
+    else if (app.id === 'instagram') {
+      let likes = parseInt(localStorage.getItem('applock_ig_likes') || '1420');
+      container.innerHTML = `
+        <div style="background: #000; border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,0.1); color: #FFF;">
+          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
+            <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #FF9F0A, #E1306C); padding: 2px;">
+              <div style="width: 100%; height: 100%; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 16px;">👤</div>
+            </div>
+            <span style="font-weight: 700; font-size: 14px;">applock_official</span>
+          </div>
+          <div style="background: linear-gradient(135deg, #1A1E2E, #12141F); height: 200px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 54px; margin-bottom: 12px; border: 1px solid rgba(0,199,255,0.3);">
+            🛡️
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+            <button id="ig-like-btn" class="btn-secondary" style="border-color: #E1306C; color: #E1306C; padding: 6px 16px;">❤️ Like (<span id="ig-like-cnt">${likes}</span>)</button>
+            <span style="font-size: 12px; color: var(--text-muted);">2 hours ago</span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Protected by App Lock zero-data-snooping security engine.</p>
+        </div>
+      `;
+      setTimeout(() => {
+        document.getElementById('ig-like-btn').onclick = () => {
+          likes += 1;
+          localStorage.setItem('applock_ig_likes', likes.toString());
+          document.getElementById('ig-like-cnt').innerText = likes.toString();
+        };
+      }, 50);
+    }
+    else {
+      container.innerHTML = `
+        <div style="padding: 30px; text-align: center; color: var(--text-secondary);">
+          <div style="font-size: 52px; margin-bottom: 16px;">${app.icon}</div>
+          <h3 style="color: #FFF; font-family: var(--font-heading); margin-bottom: 8px;">Active Protected Application: ${app.name}</h3>
+          <p style="font-size: 14px; max-width: 400px; margin: 0 auto 20px;">This application is active and protected under the App Lock security posture. Zero data snooping active.</p>
+          <div style="display: inline-block; background: rgba(52,199,89,0.15); color: var(--color-success); border: 1px solid var(--color-success); padding: 8px 18px; border-radius: 9999px; font-size: 13px; font-weight: 700;">
+            ✓ Real-Time Shield Armed
+          </div>
+        </div>
+      `;
+    }
+
     sandboxModal.classList.add('active-modal');
   }
 
