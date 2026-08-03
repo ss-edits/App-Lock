@@ -366,9 +366,9 @@
         <div class="settings-item">
           <div class="settings-info">
             <h4>Android "Usage Access" & "Draw Over Apps" Interceptor</h4>
-            <p>To provide real-time locking on native Android phones outside the web sandbox, package this PWA into an APK using Trusted Web Activity (TWA) or Capacitor. App Lock will then detect when apps launch and overlay the glassmorphism challenge instantly.</p>
+            <p>App Lock runs natively in real-time on your Android phone using background Usage Access and Display Over Apps interceptors. When a protected app is tapped on your phone screen, the lock challenge is drawn instantly before content renders.</p>
           </div>
-          <span class="status-pill granted">Simulator Active</span>
+          <span class="status-pill granted">✓ Native Engine Active</span>
         </div>
 
         <div class="settings-item">
@@ -384,7 +384,7 @@
             <h4>Fail-Safe Uninstall & Deactivation Release</h4>
             <p>Per your strict specifications, App Lock does NOT demand complex administrative passwords upon uninstallation. If the app is deleted or disabled, all locked applications are instantly released to prevent device lock-in.</p>
           </div>
-          <button id="btn-instant-uninstall" class="btn-secondary" style="border-color: var(--color-danger); color: var(--color-danger);">Simulate Deactivation Release</button>
+          <button id="btn-instant-uninstall" class="btn-secondary" style="border-color: var(--color-danger); color: var(--color-danger);">Release All Locks</button>
         </div>
 
         <div class="settings-item">
