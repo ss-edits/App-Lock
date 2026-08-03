@@ -33,7 +33,7 @@ class AuthEngine {
   }
 
   /**
-   * Verify an authenticator credential against a stored hash or default testing credentials
+   * Verify an authenticator credential against user-customized hashes or default credentials
    */
   async verifyCredential(appId, attemptValue, lockType, configuredHash) {
     // Check if app is currently locked out from brute force attempts
@@ -43,13 +43,18 @@ class AuthEngine {
 
     const inputHash = await this.hashData(attemptValue);
     
-    // In our live demo simulator, if custom hash not set, default PIN is '2026', Pattern is '0,1,2,5,8', Password is 'apple'
+    // Check user custom hashes or configured hashes
     let targetHash = configuredHash;
     if (!targetHash) {
-      if (lockType === 'pin') targetHash = await this.hashData('2026');
-      else if (lockType === 'pattern') targetHash = await this.hashData('0,1,2,5,8');
-      else if (lockType === 'password') targetHash = await this.hashData('apple');
-      else if (lockType === 'biometrics') return { success: true };
+      if (lockType === 'pin') {
+        targetHash = localStorage.getItem('applock_custom_pin_hash') || await this.hashData('2026');
+      } else if (lockType === 'pattern') {
+        targetHash = localStorage.getItem('applock_custom_pattern_hash') || await this.hashData('0,1,2,5,8');
+      } else if (lockType === 'password') {
+        targetHash = localStorage.getItem('applock_custom_password_hash') || await this.hashData('apple');
+      } else if (lockType === 'biometrics') {
+        return { success: true };
+      }
     }
 
     const isMatch = (inputHash === targetHash);
@@ -68,6 +73,27 @@ class AuthEngine {
     // Success! Reset attempts for this app
     this.clearFailedAttempts(appId);
     return { success: true };
+  }
+
+  async setCustomPIN(newPin) {
+    const hash = await this.hashData(newPin);
+    localStorage.setItem('applock_custom_pin_hash', hash);
+    localStorage.setItem('applock_pin_set', 'true');
+    return true;
+  }
+
+  async setCustomPattern(patternString) {
+    const hash = await this.hashData(patternString);
+    localStorage.setItem('applock_custom_pattern_hash', hash);
+    localStorage.setItem('applock_pattern_set', 'true');
+    return true;
+  }
+
+  async setCustomPassword(newPass) {
+    const hash = await this.hashData(newPass);
+    localStorage.setItem('applock_custom_password_hash', hash);
+    localStorage.setItem('applock_password_set', 'true');
+    return true;
   }
 
   async verifyMasterRecovery(inputString) {
