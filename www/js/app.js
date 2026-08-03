@@ -14,14 +14,26 @@ document.addEventListener('DOMContentLoaded', async () => {
   let currentPinInput = '';
 
   const defaultAppDirectory = {
-    'banking': { id: 'banking', name: 'Global Banking', category: 'Finance', icon: '🏛️', color: '#0071E3', locked: true, lockType: 'pin', invisiblePattern: false },
-    'whatsapp': { id: 'whatsapp', name: 'WhatsApp', category: 'Messaging', icon: '💬', color: '#25D366', locked: true, lockType: 'pattern', invisiblePattern: true },
-    'gallery': { id: 'gallery', name: 'Photo Gallery', category: 'Media', icon: '🖼️', color: '#FF9F0A', locked: true, lockType: 'password', invisiblePattern: false },
-    'instagram': { id: 'instagram', name: 'Instagram', category: 'Social', icon: '📸', color: '#E1306C', locked: true, lockType: 'biometrics', invisiblePattern: false },
-    'telegram': { id: 'telegram', name: 'Telegram', category: 'Messaging', icon: '✈️', color: '#0088CC', locked: false, lockType: 'pin', invisiblePattern: false },
-    'settings': { id: 'settings', name: 'Device Settings', category: 'System', icon: '⚙️', color: '#8E8E93', locked: true, lockType: 'pin', invisiblePattern: false },
-    'gmail': { id: 'gmail', name: 'Work Mail', category: 'Productivity', icon: '📧', color: '#EA4335', locked: false, lockType: 'pattern', invisiblePattern: false },
-    'tiktok': { id: 'tiktok', name: 'TikTok', category: 'Social', icon: '🎵', color: '#000000', locked: false, lockType: 'pin', invisiblePattern: false }
+    'whatsapp': { id: 'whatsapp', pkg: 'com.whatsapp', name: 'WhatsApp', category: 'Social', icon: '💬', color: '#25D366', locked: true, lockType: 'pattern', invisiblePattern: true },
+    'instagram': { id: 'instagram', pkg: 'com.instagram.android', name: 'Instagram', category: 'Social', icon: '📸', color: '#E1306C', locked: true, lockType: 'biometrics', invisiblePattern: false },
+    'photos': { id: 'photos', pkg: 'com.google.android.apps.photos', name: 'Google Photos & Gallery', category: 'Media', icon: '🖼️', color: '#FF9F0A', locked: true, lockType: 'password', invisiblePattern: false },
+    'paytm': { id: 'paytm', pkg: 'net.one97.paytm', name: 'Paytm Wallet & UPI', category: 'Finance', icon: '💳', color: '#002E6E', locked: true, lockType: 'pin', invisiblePattern: false },
+    'gpay': { id: 'gpay', pkg: 'com.google.android.apps.nfc.payment', name: 'Google Pay (GPay)', category: 'Finance', icon: '💰', color: '#4285F4', locked: true, lockType: 'pin', invisiblePattern: false },
+    'phonepe': { id: 'phonepe', pkg: 'com.phonepe.app', name: 'PhonePe UPI', category: 'Finance', icon: '🟣', color: '#5F259F', locked: true, lockType: 'pin', invisiblePattern: false },
+    'youtube': { id: 'youtube', pkg: 'com.google.android.youtube', name: 'YouTube', category: 'Media', icon: '▶️', color: '#FF0000', locked: false, lockType: 'pattern', invisiblePattern: false },
+    'chrome': { id: 'chrome', pkg: 'com.android.chrome', name: 'Google Chrome', category: 'System', icon: '🌐', color: '#0F9D58', locked: true, lockType: 'pin', invisiblePattern: false },
+    'facebook': { id: 'facebook', pkg: 'com.facebook.katana', name: 'Facebook', category: 'Social', icon: '📘', color: '#1877F2', locked: false, lockType: 'pin', invisiblePattern: false },
+    'snapchat': { id: 'snapchat', pkg: 'com.snapchat.android', name: 'Snapchat', category: 'Social', icon: '👻', color: '#FFFC00', locked: true, lockType: 'pattern', invisiblePattern: true },
+    'telegram': { id: 'telegram', pkg: 'org.telegram.messenger', name: 'Telegram', category: 'Social', icon: '✈️', color: '#0088CC', locked: false, lockType: 'pin', invisiblePattern: false },
+    'banking': { id: 'banking', pkg: 'com.banking.app', name: 'Global Banking', category: 'Finance', icon: '🏛️', color: '#0071E3', locked: true, lockType: 'pin', invisiblePattern: false },
+    'spotify': { id: 'spotify', pkg: 'com.spotify.music', name: 'Spotify Music', category: 'Media', icon: '🎵', color: '#1DB954', locked: false, lockType: 'pin', invisiblePattern: false },
+    'netflix': { id: 'netflix', pkg: 'com.netflix.mediaclient', name: 'Netflix', category: 'Media', icon: '🎬', color: '#E50914', locked: false, lockType: 'pin', invisiblePattern: false },
+    'gmail': { id: 'gmail', pkg: 'com.google.android.gm', name: 'Gmail', category: 'Productivity', icon: '📧', color: '#EA4335', locked: false, lockType: 'pattern', invisiblePattern: false },
+    'camera': { id: 'camera', pkg: 'com.android.camera', name: 'Camera', category: 'System', icon: '📷', color: '#5F6368', locked: true, lockType: 'biometrics', invisiblePattern: false },
+    'contacts': { id: 'contacts', pkg: 'com.android.contacts', name: 'Contacts & Phone', category: 'System', icon: '📞', color: '#34A853', locked: true, lockType: 'pin', invisiblePattern: false },
+    'messages': { id: 'messages', pkg: 'com.google.android.apps.messaging', name: 'SMS Messages', category: 'Social', icon: '💬', color: '#1A73E8', locked: true, lockType: 'pattern', invisiblePattern: true },
+    'settings': { id: 'settings', pkg: 'com.android.settings', name: 'Device Settings', category: 'System', icon: '⚙️', color: '#8E8E93', locked: true, lockType: 'pin', invisiblePattern: false },
+    'tiktok': { id: 'tiktok', pkg: 'com.zhiliaoapp.musically', name: 'TikTok', category: 'Social', icon: '🎵', color: '#000000', locked: false, lockType: 'pin', invisiblePattern: false }
   };
 
   let appConfigs = JSON.parse(localStorage.getItem('applock_app_configs')) || defaultAppDirectory;
@@ -99,11 +111,44 @@ document.addEventListener('DOMContentLoaded', async () => {
      ========================================================================== */
   const appsGrid = document.getElementById('apps-grid');
 
+  let currentSearchQuery = '';
+  let currentCategoryFilter = 'all';
+
+  const searchInput = document.getElementById('installed-app-search');
+  if (searchInput) {
+    searchInput.oninput = (e) => {
+      currentSearchQuery = e.target.value.toLowerCase().trim();
+      renderAppProtectionList();
+    };
+  }
+
+  document.querySelectorAll('.filter-btn').forEach(btn => {
+    btn.onclick = () => {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentCategoryFilter = btn.dataset.cat;
+      renderAppProtectionList();
+    };
+  });
+
   function renderAppProtectionList() {
     if (!appsGrid) return;
     appsGrid.innerHTML = '';
 
-    Object.values(appConfigs).forEach(app => {
+    const filteredApps = Object.values(appConfigs).filter(app => {
+      const matchSearch = app.name.toLowerCase().includes(currentSearchQuery) || 
+                          (app.category && app.category.toLowerCase().includes(currentSearchQuery)) ||
+                          (app.pkg && app.pkg.toLowerCase().includes(currentSearchQuery));
+      const matchCat = (currentCategoryFilter === 'all') || (app.category === currentCategoryFilter);
+      return matchSearch && matchCat;
+    });
+
+    if (filteredApps.length === 0) {
+      appsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No matching installed applications found. Click <b>"➕ Lock Custom App"</b> above to add any app!</div>`;
+      return;
+    }
+
+    filteredApps.forEach(app => {
       const card = document.createElement('div');
       card.className = `app-card ${app.locked ? 'locked-active' : ''}`;
       card.innerHTML = `
@@ -112,7 +157,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="app-icon-wrapper" style="background-color: ${app.color}">${app.icon}</div>
             <div class="app-title-box">
               <h4>${app.name}</h4>
-              <div class="app-category">${app.category}</div>
+              <div class="app-category">${app.category} ${app.pkg ? `• <span style="opacity: 0.6; font-size:10px;">${app.pkg}</span>` : ''}</div>
             </div>
           </div>
           <label class="apple-switch">

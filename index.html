@@ -221,15 +221,27 @@
       <div class="section-header">
         <div>
           <h2 class="section-title">Protected Applications</h2>
-          <p class="section-desc">Lock any application installed on your device with custom PINs, Patterns, Passwords, or Biometrics.</p>
+          <p class="section-desc">Select and lock any real application installed on your Android phone with independent PINs, Patterns, or Biometrics.</p>
         </div>
         <div style="display: flex; gap: 12px; flex-wrap: wrap;">
           <button id="btn-open-add-app" class="btn-primary" style="background: linear-gradient(135deg, #00C7FF, #8A53FF);">
-            ➕ Lock New App
+            ➕ Lock Custom App
           </button>
           <button class="btn-secondary" onclick="document.querySelector('[data-view=\'sandbox\']').click();">
             Open App Launcher ➔
           </button>
+        </div>
+      </div>
+
+      <!-- Real-Time App Search & Filter Bar -->
+      <div style="margin-bottom: 24px; display: flex; flex-direction: column; gap: 12px;">
+        <input type="text" id="installed-app-search" class="glass-input" placeholder="🔍 Search installed phone apps (e.g. WhatsApp, Photos, Paytm, Banking, YouTube)..." style="font-size: 15px; padding: 14px 20px;">
+        <div style="display: flex; gap: 10px; flex-wrap: wrap; font-size: 13px;">
+          <button class="btn-secondary filter-btn active" data-cat="all" style="padding: 6px 14px;">All Installed Apps</button>
+          <button class="btn-secondary filter-btn" data-cat="Finance" style="padding: 6px 14px;">Finance & Payments</button>
+          <button class="btn-secondary filter-btn" data-cat="Social" style="padding: 6px 14px;">Social & Messaging</button>
+          <button class="btn-secondary filter-btn" data-cat="Media" style="padding: 6px 14px;">Photos & Media</button>
+          <button class="btn-secondary filter-btn" data-cat="System" style="padding: 6px 14px;">System & Settings</button>
         </div>
       </div>
 
