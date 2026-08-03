@@ -357,6 +357,21 @@ document.addEventListener('DOMContentLoaded', async () => {
     lockInterceptModal.classList.add('active-modal');
   }
 
+  /* ==========================================================================
+     Native Android Background App Lock Listener
+     ========================================================================== */
+  window.onNativeAppLocked = function(lockedPkg) {
+    if (!lockedPkg) return;
+    const targetApp = Object.values(appConfigs).find(a => 
+      (a.pkg && a.pkg.toLowerCase() === lockedPkg.toLowerCase()) || 
+      (a.id && a.id.toLowerCase() === lockedPkg.toLowerCase())
+    );
+
+    if (targetApp && targetApp.locked) {
+      triggerAppLaunch(targetApp.id);
+    }
+  };
+
   function setupActiveAuthenticatorUI(app) {
     const type = app.lockType;
     if (type === 'pin') {
