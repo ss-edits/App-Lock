@@ -8,6 +8,7 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
@@ -24,7 +25,6 @@ public class AppLockService extends Service {
     private Runnable monitorRunnable;
     private String lastForegroundPackage = "";
     
-    // Set of locked packages
     private static Set<String> lockedPackages = new HashSet<>();
 
     public static void setLockedPackages(Set<String> packages) {
@@ -44,6 +44,12 @@ public class AppLockService extends Service {
         
         startForeground(1001, notification);
 
+        SharedPreferences prefs = getSharedPreferences("AppLockPrefs", Context.MODE_PRIVATE);
+        Set<String> savedPackages = prefs.getStringSet("locked_packages", null);
+        if (savedPackages != null) {
+            lockedPackages = new HashSet<>(savedPackages);
+        }
+
         handler = new Handler(Looper.getMainLooper());
         monitorRunnable = new Runnable() {
             @Override
@@ -58,7 +64,16 @@ public class AppLockService extends Service {
     private void checkForegroundApp() {
         String currentPackage = getForegroundPackageName();
         if (currentPackage != null && !currentPackage.equals(getPackageName()) && !currentPackage.equals(lastForegroundPackage)) {
-            if (lockedPackages.contains(currentPackage) || isDefaultLockedPackage(currentPackage)) {
+            SharedPreferences prefs = getSharedPreferences("AppLockPrefs", Context.MODE_PRIVATE);
+            Set<String> currentLocked = prefs.getStringSet("locked_packages", null);
+            boolean isLocked = false;
+            if (currentLocked != null) {
+                isLocked = currentLocked.contains(currentPackage);
+            } else {
+                isLocked = lockedPackages.contains(currentPackage) || isDefaultLockedPackage(currentPackage);
+            }
+
+            if (isLocked) {
                 lastForegroundPackage = currentPackage;
                 Intent lockIntent = new Intent(this, MainActivity.class);
                 lockIntent.setAction(Intent.ACTION_MAIN);

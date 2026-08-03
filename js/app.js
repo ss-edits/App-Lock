@@ -1,6 +1,6 @@
 /**
- * App Lock & Secure Media Vault — Master Application Controller
- * Handles zero-delay lock interception, UI views, scenario profiles, PWA install prompts, and Vault binding.
+ * App Lock & Secure Media Vault — Master Application Controller & Android Native Bridge
+ * Handles real-time Android app interception, system permissions, UI views, scenario profiles, and offline Vault.
  */
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -13,31 +13,155 @@ document.addEventListener('DOMContentLoaded', async () => {
   let patternLockInstance = null;
   let currentPinInput = '';
 
+  // Default fallback directory when previewing in PC desktop browser (outside Android APK)
   const defaultAppDirectory = {
-    'whatsapp': { id: 'whatsapp', pkg: 'com.whatsapp', name: 'WhatsApp', category: 'Social', icon: '💬', color: '#25D366', locked: true, lockType: 'pattern', invisiblePattern: true },
-    'instagram': { id: 'instagram', pkg: 'com.instagram.android', name: 'Instagram', category: 'Social', icon: '📸', color: '#E1306C', locked: true, lockType: 'biometrics', invisiblePattern: false },
-    'photos': { id: 'photos', pkg: 'com.google.android.apps.photos', name: 'Google Photos & Gallery', category: 'Media', icon: '🖼️', color: '#FF9F0A', locked: true, lockType: 'password', invisiblePattern: false },
-    'paytm': { id: 'paytm', pkg: 'net.one97.paytm', name: 'Paytm Wallet & UPI', category: 'Finance', icon: '💳', color: '#002E6E', locked: true, lockType: 'pin', invisiblePattern: false },
-    'gpay': { id: 'gpay', pkg: 'com.google.android.apps.nfc.payment', name: 'Google Pay (GPay)', category: 'Finance', icon: '💰', color: '#4285F4', locked: true, lockType: 'pin', invisiblePattern: false },
-    'phonepe': { id: 'phonepe', pkg: 'com.phonepe.app', name: 'PhonePe UPI', category: 'Finance', icon: '🟣', color: '#5F259F', locked: true, lockType: 'pin', invisiblePattern: false },
-    'youtube': { id: 'youtube', pkg: 'com.google.android.youtube', name: 'YouTube', category: 'Media', icon: '▶️', color: '#FF0000', locked: false, lockType: 'pattern', invisiblePattern: false },
-    'chrome': { id: 'chrome', pkg: 'com.android.chrome', name: 'Google Chrome', category: 'System', icon: '🌐', color: '#0F9D58', locked: true, lockType: 'pin', invisiblePattern: false },
-    'facebook': { id: 'facebook', pkg: 'com.facebook.katana', name: 'Facebook', category: 'Social', icon: '📘', color: '#1877F2', locked: false, lockType: 'pin', invisiblePattern: false },
-    'snapchat': { id: 'snapchat', pkg: 'com.snapchat.android', name: 'Snapchat', category: 'Social', icon: '👻', color: '#FFFC00', locked: true, lockType: 'pattern', invisiblePattern: true },
-    'telegram': { id: 'telegram', pkg: 'org.telegram.messenger', name: 'Telegram', category: 'Social', icon: '✈️', color: '#0088CC', locked: false, lockType: 'pin', invisiblePattern: false },
-    'banking': { id: 'banking', pkg: 'com.banking.app', name: 'Global Banking', category: 'Finance', icon: '🏛️', color: '#0071E3', locked: true, lockType: 'pin', invisiblePattern: false },
-    'spotify': { id: 'spotify', pkg: 'com.spotify.music', name: 'Spotify Music', category: 'Media', icon: '🎵', color: '#1DB954', locked: false, lockType: 'pin', invisiblePattern: false },
-    'netflix': { id: 'netflix', pkg: 'com.netflix.mediaclient', name: 'Netflix', category: 'Media', icon: '🎬', color: '#E50914', locked: false, lockType: 'pin', invisiblePattern: false },
-    'gmail': { id: 'gmail', pkg: 'com.google.android.gm', name: 'Gmail', category: 'Productivity', icon: '📧', color: '#EA4335', locked: false, lockType: 'pattern', invisiblePattern: false },
-    'camera': { id: 'camera', pkg: 'com.android.camera', name: 'Camera', category: 'System', icon: '📷', color: '#5F6368', locked: true, lockType: 'biometrics', invisiblePattern: false },
-    'contacts': { id: 'contacts', pkg: 'com.android.contacts', name: 'Contacts & Phone', category: 'System', icon: '📞', color: '#34A853', locked: true, lockType: 'pin', invisiblePattern: false },
-    'messages': { id: 'messages', pkg: 'com.google.android.apps.messaging', name: 'SMS Messages', category: 'Social', icon: '💬', color: '#1A73E8', locked: true, lockType: 'pattern', invisiblePattern: true },
-    'settings': { id: 'settings', pkg: 'com.android.settings', name: 'Device Settings', category: 'System', icon: '⚙️', color: '#8E8E93', locked: true, lockType: 'pin', invisiblePattern: false },
-    'tiktok': { id: 'tiktok', pkg: 'com.zhiliaoapp.musically', name: 'TikTok', category: 'Social', icon: '🎵', color: '#000000', locked: false, lockType: 'pin', invisiblePattern: false }
+    'com.whatsapp': { id: 'com.whatsapp', pkg: 'com.whatsapp', name: 'WhatsApp Messenger', category: 'Social & Messaging', icon: '💬', color: '#25D366', locked: true, lockType: 'pattern', invisiblePattern: true },
+    'com.instagram.android': { id: 'com.instagram.android', pkg: 'com.instagram.android', name: 'Instagram', category: 'Social & Messaging', icon: '📸', color: '#E1306C', locked: true, lockType: 'biometrics', invisiblePattern: false },
+    'com.google.android.apps.photos': { id: 'com.google.android.apps.photos', pkg: 'com.google.android.apps.photos', name: 'Google Photos & Gallery', category: 'Photos & Media', icon: '🖼️', color: '#FF9F0A', locked: true, lockType: 'password', invisiblePattern: false },
+    'net.one97.paytm': { id: 'net.one97.paytm', pkg: 'net.one97.paytm', name: 'Paytm Wallet & UPI', category: 'Finance & Payments', icon: '💳', color: '#002E6E', locked: true, lockType: 'pin', invisiblePattern: false },
+    'com.google.android.apps.nfc.payment': { id: 'com.google.android.apps.nfc.payment', pkg: 'com.google.android.apps.nfc.payment', name: 'Google Pay (GPay)', category: 'Finance & Payments', icon: '💰', color: '#4285F4', locked: true, lockType: 'pin', invisiblePattern: false },
+    'com.phonepe.app': { id: 'com.phonepe.app', pkg: 'com.phonepe.app', name: 'PhonePe UPI', category: 'Finance & Payments', icon: '🟣', color: '#5F259F', locked: true, lockType: 'pin', invisiblePattern: false },
+    'com.google.android.youtube': { id: 'com.google.android.youtube', pkg: 'com.google.android.youtube', name: 'YouTube', category: 'Photos & Media', icon: '▶️', color: '#FF0000', locked: false, lockType: 'pattern', invisiblePattern: false },
+    'com.android.chrome': { id: 'com.android.chrome', pkg: 'com.android.chrome', name: 'Google Chrome', category: 'System & Settings', icon: '🌐', color: '#0F9D58', locked: true, lockType: 'pin', invisiblePattern: false },
+    'com.facebook.katana': { id: 'com.facebook.katana', pkg: 'com.facebook.katana', name: 'Facebook', category: 'Social & Messaging', icon: '📘', color: '#1877F2', locked: false, lockType: 'pin', invisiblePattern: false },
+    'com.snapchat.android': { id: 'com.snapchat.android', pkg: 'com.snapchat.android', name: 'Snapchat', category: 'Social & Messaging', icon: '👻', color: '#FFFC00', locked: true, lockType: 'pattern', invisiblePattern: true },
+    'org.telegram.messenger': { id: 'org.telegram.messenger', pkg: 'org.telegram.messenger', name: 'Telegram Messenger', category: 'Social & Messaging', icon: '✈️', color: '#0088CC', locked: false, lockType: 'pin', invisiblePattern: false },
+    'com.spotify.music': { id: 'com.spotify.music', pkg: 'com.spotify.music', name: 'Spotify Music', category: 'Photos & Media', icon: '🎵', color: '#1DB954', locked: false, lockType: 'pin', invisiblePattern: false },
+    'com.netflix.mediaclient': { id: 'com.netflix.mediaclient', pkg: 'com.netflix.mediaclient', name: 'Netflix', category: 'Photos & Media', icon: '🎬', color: '#E50914', locked: false, lockType: 'pin', invisiblePattern: false },
+    'com.google.android.gm': { id: 'com.google.android.gm', pkg: 'com.google.android.gm', name: 'Gmail', category: 'General', icon: '📧', color: '#EA4335', locked: false, lockType: 'pattern', invisiblePattern: false },
+    'com.android.camera': { id: 'com.android.camera', pkg: 'com.android.camera', name: 'Camera', category: 'System & Settings', icon: '📷', color: '#5F6368', locked: true, lockType: 'biometrics', invisiblePattern: false },
+    'com.android.settings': { id: 'com.android.settings', pkg: 'com.android.settings', name: 'Device Settings', category: 'System & Settings', icon: '⚙️', color: '#8E8E93', locked: true, lockType: 'pin', invisiblePattern: false }
   };
 
   let appConfigs = JSON.parse(localStorage.getItem('applock_app_configs')) || defaultAppDirectory;
   let activeProfile = localStorage.getItem('applock_active_profile') || 'default';
+
+  /* ==========================================================================
+     Android Native Bridge & System Permission Monitor
+     ========================================================================== */
+  function syncWithNativeEngine() {
+    if (window.NativeAppLock && typeof window.NativeAppLock.getInstalledApps === 'function') {
+      try {
+        const installedJson = window.NativeAppLock.getInstalledApps();
+        const liveApps = JSON.parse(installedJson);
+        const mergedConfigs = {};
+
+        liveApps.forEach(app => {
+          const existing = appConfigs[app.pkg] || appConfigs[app.name.toLowerCase()];
+          mergedConfigs[app.pkg] = {
+            id: app.pkg,
+            pkg: app.pkg,
+            name: app.name,
+            category: app.category || 'General',
+            icon: app.icon || '📱',
+            color: app.color || '#0071E3',
+            locked: existing ? existing.locked : isDefaultLockCandidate(app.pkg),
+            lockType: existing ? existing.lockType : 'pin',
+            invisiblePattern: existing ? existing.invisiblePattern : false,
+            customHash: existing ? existing.customHash : null
+          };
+        });
+
+        Object.keys(appConfigs).forEach(k => {
+          if (!mergedConfigs[k] && appConfigs[k].isCustom) {
+            mergedConfigs[k] = appConfigs[k];
+          }
+        });
+
+        appConfigs = mergedConfigs;
+        saveConfigs(false);
+      } catch(err) {
+        console.error('Error fetching live Android PackageManager apps:', err);
+      }
+    }
+
+    sendLockedAppsToNative();
+    checkAndroidPermissions();
+  }
+
+  function isDefaultLockCandidate(pkg) {
+    const p = (pkg || '').toLowerCase();
+    return p.includes('whatsapp') || p.includes('instagram') || p.includes('photo') || p.includes('paytm') || p.includes('payment') || p.includes('phonepe') || p.includes('snapchat');
+  }
+
+  function sendLockedAppsToNative() {
+    if (window.NativeAppLock && typeof window.NativeAppLock.setLockedApps === 'function') {
+      const lockedPkgs = Object.values(appConfigs)
+        .filter(a => a.locked && a.pkg)
+        .map(a => a.pkg);
+      window.NativeAppLock.setLockedApps(JSON.stringify(lockedPkgs));
+    }
+  }
+
+  function checkAndroidPermissions() {
+    if (window.NativeAppLock && typeof window.NativeAppLock.checkUsageAccessPermission === 'function') {
+      const hasUsage = window.NativeAppLock.checkUsageAccessPermission();
+      const hasOverlay = window.NativeAppLock.checkOverlayPermission();
+      
+      const banner = document.getElementById('android-permissions-banner');
+      if (banner) {
+        banner.style.display = (!hasUsage || !hasOverlay) ? 'block' : 'none';
+      }
+
+      const usageBtn = document.getElementById('setting-btn-usage');
+      if (usageBtn) {
+        if (hasUsage) {
+          usageBtn.innerText = '✅ Permission Granted';
+          usageBtn.style.borderColor = '#34C759';
+          usageBtn.style.color = '#34C759';
+        } else {
+          usageBtn.innerText = '⚠️ Tap to Grant Usage Access';
+          usageBtn.style.borderColor = '#FF9F0A';
+          usageBtn.style.color = '#FF9F0A';
+        }
+      }
+
+      const overlayBtn = document.getElementById('setting-btn-overlay');
+      if (overlayBtn) {
+        if (hasOverlay) {
+          overlayBtn.innerText = '✅ Permission Granted';
+          overlayBtn.style.borderColor = '#34C759';
+          overlayBtn.style.color = '#34C759';
+        } else {
+          overlayBtn.innerText = '⚠️ Tap to Grant Overlay Permission';
+          overlayBtn.style.borderColor = '#FF9F0A';
+          overlayBtn.style.color = '#FF9F0A';
+        }
+      }
+    }
+  }
+
+  const btnGrantUsage = document.getElementById('btn-grant-usage');
+  const btnGrantOverlay = document.getElementById('btn-grant-overlay');
+  const settingBtnUsage = document.getElementById('setting-btn-usage');
+  const settingBtnOverlay = document.getElementById('setting-btn-overlay');
+
+  const triggerUsagePerm = () => {
+    if (window.NativeAppLock && window.NativeAppLock.requestUsageAccessPermission) {
+      showNotification('Opening Android Settings -> Usage Access...', 'info');
+      window.NativeAppLock.requestUsageAccessPermission();
+    } else {
+      showNotification('Please install our Android APK to access System Settings.', 'warning');
+    }
+  };
+
+  const triggerOverlayPerm = () => {
+    if (window.NativeAppLock && window.NativeAppLock.requestOverlayPermission) {
+      showNotification('Opening Android Settings -> Display over other apps...', 'info');
+      window.NativeAppLock.requestOverlayPermission();
+    } else {
+      showNotification('Please install our Android APK to access System Settings.', 'warning');
+    }
+  };
+
+  if (btnGrantUsage) btnGrantUsage.onclick = triggerUsagePerm;
+  if (settingBtnUsage) settingBtnUsage.onclick = triggerUsagePerm;
+  if (btnGrantOverlay) btnGrantOverlay.onclick = triggerOverlayPerm;
+  if (settingBtnOverlay) settingBtnOverlay.onclick = triggerOverlayPerm;
+
+  window.addEventListener('focus', () => {
+    checkAndroidPermissions();
+  });
 
   /* ==========================================================================
      PWA Offline Install & Native APK Download Modal Handlers
@@ -65,7 +189,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         deferredInstallPrompt.prompt();
         deferredInstallPrompt.userChoice.then((choice) => {
           if (choice.outcome === 'accepted') {
-            showNotification('App Lock native standalone app installed!', 'success');
+            showNotification('App Lock standalone app installed!', 'success');
           }
           deferredInstallPrompt = null;
         });
@@ -102,6 +226,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       });
 
       if (targetView === 'vault') loadVaultMedia();
+      if (targetView === 'apps') syncWithNativeEngine();
       window.scrollTo({ top: 0, behavior: 'smooth' });
     });
   });
@@ -110,7 +235,6 @@ document.addEventListener('DOMContentLoaded', async () => {
      App Protection Command Dashboard Render & Toggle Logic
      ========================================================================== */
   const appsGrid = document.getElementById('apps-grid');
-
   let currentSearchQuery = '';
   let currentCategoryFilter = 'all';
 
@@ -136,15 +260,26 @@ document.addEventListener('DOMContentLoaded', async () => {
     appsGrid.innerHTML = '';
 
     const filteredApps = Object.values(appConfigs).filter(app => {
-      const matchSearch = app.name.toLowerCase().includes(currentSearchQuery) || 
+      const matchSearch = (app.name && app.name.toLowerCase().includes(currentSearchQuery)) || 
                           (app.category && app.category.toLowerCase().includes(currentSearchQuery)) ||
                           (app.pkg && app.pkg.toLowerCase().includes(currentSearchQuery));
-      const matchCat = (currentCategoryFilter === 'all') || (app.category === currentCategoryFilter);
+      const matchCat = (currentCategoryFilter === 'all') || 
+                       (app.category && app.category.includes(currentCategoryFilter));
       return matchSearch && matchCat;
     });
 
+    if (!window.NativeAppLock) {
+      const notice = document.createElement('div');
+      notice.style.cssText = 'grid-column: 1/-1; background: rgba(0, 199, 255, 0.1); border: 1px solid rgba(0, 199, 255, 0.3); color: #FFF; padding: 14px 20px; border-radius: 12px; margin-bottom: 12px; font-size: 13px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px;';
+      notice.innerHTML = `<span>💻 <b>Browser Preview Mode Active:</b> Showing popular app presets. Install our native Android APK on your mobile device to live-scan and lock your real installed phone apps!</span>`;
+      appsGrid.appendChild(notice);
+    }
+
     if (filteredApps.length === 0) {
-      appsGrid.innerHTML = `<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No matching installed applications found. Click <b>"➕ Lock Custom App"</b> above to add any app!</div>`;
+      const emptyMsg = document.createElement('div');
+      emptyMsg.style.cssText = 'grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);';
+      emptyMsg.innerHTML = `No matching applications found. Click <b>"➕ Lock Custom App"</b> above to register any package!`;
+      appsGrid.appendChild(emptyMsg);
       return;
     }
 
@@ -157,7 +292,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             <div class="app-icon-wrapper" style="background-color: ${app.color}">${app.icon}</div>
             <div class="app-title-box">
               <h4>${app.name}</h4>
-              <div class="app-category">${app.category} ${app.pkg ? `• <span style="opacity: 0.6; font-size:10px;">${app.pkg}</span>` : ''}</div>
+              <div class="app-category">${app.category} ${app.pkg ? `• <span style="opacity: 0.7; font-size:11px; color:#FFF;">${app.pkg}</span>` : ''}</div>
             </div>
           </div>
           <label class="apple-switch">
@@ -178,11 +313,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.querySelectorAll('.app-toggle-input').forEach(input => {
       input.addEventListener('change', (e) => {
         const id = e.target.dataset.id;
-        appConfigs[id].locked = e.target.checked;
-        saveConfigs();
-        renderAppProtectionList();
-        renderSandboxLauncher();
-        showNotification(`${appConfigs[id].name} protection ${e.target.checked ? 'Enabled' : 'Disabled'}.`, e.target.checked ? 'success' : 'warning');
+        if (appConfigs[id]) {
+          appConfigs[id].locked = e.target.checked;
+          saveConfigs(true);
+          showNotification(`${appConfigs[id].name} real-time lock ${e.target.checked ? 'Enabled' : 'Disabled'}.`, e.target.checked ? 'success' : 'warning');
+        }
       });
     });
 
@@ -193,8 +328,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  function saveConfigs() {
+  function saveConfigs(reRender = false) {
     localStorage.setItem('applock_app_configs', JSON.stringify(appConfigs));
+    sendLockedAppsToNative();
+    if (reRender) renderAppProtectionList();
   }
 
   /* ==========================================================================
@@ -205,9 +342,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   function openConfigModal(appId) {
     const app = appConfigs[appId];
+    if (!app) return;
     document.getElementById('config-app-name').innerText = app.name;
     document.getElementById('config-app-icon').innerText = app.icon;
-    document.getElementById('select-lock-type').value = app.lockType;
+    document.getElementById('select-lock-type').value = app.lockType || 'pin';
     document.getElementById('toggle-invisible-pattern').checked = app.invisiblePattern || false;
     
     const patternRow = document.getElementById('row-invisible-pattern');
@@ -220,10 +358,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('btn-save-config').onclick = () => {
       appConfigs[appId].lockType = document.getElementById('select-lock-type').value;
       appConfigs[appId].invisiblePattern = document.getElementById('toggle-invisible-pattern').checked;
-      saveConfigs();
+      saveConfigs(true);
       configModal.classList.remove('active-modal');
-      renderAppProtectionList();
-      showNotification(`Lock preferences updated for ${app.name}!`, 'success');
+      showNotification(`Lock rules updated for ${app.name}!`, 'success');
     };
 
     configModal.classList.add('active-modal');
@@ -234,7 +371,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   /* ==========================================================================
-     Lock New Application Form & Modal Handlers
+     Lock New Custom Application Form & Modal Handlers
      ========================================================================== */
   const addAppModal = document.getElementById('add-app-modal');
   const btnOpenAddApp = document.getElementById('btn-open-add-app');
@@ -265,77 +402,60 @@ document.addEventListener('DOMContentLoaded', async () => {
 
       if (!name) return;
 
-      const newId = 'custom_app_' + Date.now();
+      let pkg = name.toLowerCase().includes('.') ? name.toLowerCase() : `com.custom.${name.toLowerCase().replace(/[^a-z0-9]/g, '')}`;
+      const newId = pkg;
       const presetColors = ['#0071E3', '#00C7FF', '#8A53FF', '#E1306C', '#34C759', '#FF9F0A', '#EA4335', '#25D366'];
       const randomColor = presetColors[Math.floor(Math.random() * presetColors.length)];
 
       appConfigs[newId] = {
         id: newId,
+        pkg: pkg,
         name: name,
         category: category,
         icon: icon,
         color: randomColor,
         locked: true,
         lockType: lockType,
-        invisiblePattern: false
+        invisiblePattern: false,
+        isCustom: true
       };
 
-      saveConfigs();
+      saveConfigs(true);
       closeAddAppModal();
-      renderAppProtectionList();
-      renderSandboxLauncher();
-      showNotification(`🔒 Protection enabled for ${name}!`, 'success');
+      showNotification(`🔒 Protection enabled for ${name} (${pkg})!`, 'success');
     };
   }
 
   /* ==========================================================================
-     Interactive OS Sandbox Launcher & ZERO-DELAY Lock Interceptor
+     Native Android Real-Time Background App Lock Interception Listener
      ========================================================================== */
-  const phoneHomeScreen = document.getElementById('phone-home-screen');
   const lockInterceptModal = document.getElementById('lock-intercept-modal');
 
-  function renderSandboxLauncher() {
-    if (!phoneHomeScreen) return;
-    phoneHomeScreen.innerHTML = '';
+  window.onNativeAppLocked = function(lockedPkg) {
+    if (!lockedPkg) return;
+    const targetApp = Object.values(appConfigs).find(a => 
+      (a.pkg && a.pkg.toLowerCase() === lockedPkg.toLowerCase()) || 
+      (a.id && a.id.toLowerCase() === lockedPkg.toLowerCase())
+    );
 
-    Object.values(appConfigs).forEach(app => {
-      const iconDiv = document.createElement('div');
-      iconDiv.className = 'launcher-icon';
-      iconDiv.innerHTML = `
-        <div class="icon-glyph" style="background-color: ${app.color}">
-          ${app.icon}
-          ${app.locked ? `<div class="lock-shield-indicator">🔒</div>` : ''}
-        </div>
-        <div class="launcher-label">${app.name.length > 10 ? app.name.slice(0, 9) + '…' : app.name}</div>
-      `;
-      iconDiv.addEventListener('click', () => triggerAppLaunch(app.id));
-      phoneHomeScreen.appendChild(iconDiv);
-    });
-
-    const addTile = document.createElement('div');
-    addTile.className = 'launcher-icon';
-    addTile.innerHTML = `
-      <div class="icon-glyph" style="background: linear-gradient(135deg, #00C7FF, #8A53FF); border: 2px dashed #FFF;">➕</div>
-      <div class="launcher-label">Lock App</div>
-    `;
-    addTile.addEventListener('click', () => {
-      document.getElementById('add-app-name').value = '';
-      const addAppModal = document.getElementById('add-app-modal');
-      if (addAppModal) addAppModal.classList.add('active-modal');
-    });
-    phoneHomeScreen.appendChild(addTile);
-  }
-
-  function triggerAppLaunch(appId) {
-    const app = appConfigs[appId];
-    if (!app) return;
-
-    if (!app.locked) {
-      showAppSandboxContent(app);
-      return;
+    if (targetApp && targetApp.locked) {
+      triggerLockInterceptionChallenge(targetApp.id);
+    } else {
+      triggerLockInterceptionChallenge(lockedPkg, lockedPkg);
     }
+  };
 
-    currentActiveAppId = appId;
+  function triggerLockInterceptionChallenge(appId, fallbackPkg = null) {
+    const app = appConfigs[appId] || {
+      id: fallbackPkg,
+      name: fallbackPkg,
+      icon: '🔒',
+      color: '#0071E3',
+      lockType: 'pin',
+      invisiblePattern: false
+    };
+
+    currentActiveAppId = app.id;
     currentPinInput = '';
     
     document.getElementById('intercept-app-icon').innerText = app.icon;
@@ -348,29 +468,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     const lockoutBanner = document.getElementById('lockout-banner');
     lockoutBanner.style.display = 'none';
 
-    if (authEngine.isAppLockedOut(appId)) {
-      activateLockoutUIDisplay(appId);
+    if (authEngine.isAppLockedOut(app.id)) {
+      activateLockoutUIDisplay(app.id);
     } else {
       setupActiveAuthenticatorUI(app);
     }
 
     lockInterceptModal.classList.add('active-modal');
   }
-
-  /* ==========================================================================
-     Native Android Background App Lock Listener
-     ========================================================================== */
-  window.onNativeAppLocked = function(lockedPkg) {
-    if (!lockedPkg) return;
-    const targetApp = Object.values(appConfigs).find(a => 
-      (a.pkg && a.pkg.toLowerCase() === lockedPkg.toLowerCase()) || 
-      (a.id && a.id.toLowerCase() === lockedPkg.toLowerCase())
-    );
-
-    if (targetApp && targetApp.locked) {
-      triggerAppLaunch(targetApp.id);
-    }
-  };
 
   function setupActiveAuthenticatorUI(app) {
     const type = app.lockType;
@@ -423,7 +528,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         renderPinDots(currentPinInput.length);
       }
       if (currentPinInput.length === 4) {
-        const app = appConfigs[currentActiveAppId];
+        const app = appConfigs[currentActiveAppId] || {};
         const res = await authEngine.verifyCredential(currentActiveAppId, currentPinInput, 'pin', app.customHash);
         handleAuthResult(res);
       }
@@ -431,7 +536,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   });
 
   async function handlePatternSubmit(patternString) {
-    const app = appConfigs[currentActiveAppId];
+    const app = appConfigs[currentActiveAppId] || {};
     const res = await authEngine.verifyCredential(currentActiveAppId, patternString, 'pattern', app.customHash);
     if (!res.success) {
       patternLockInstance.showErrorAndReset();
@@ -444,7 +549,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     formPassword.addEventListener('submit', async (e) => {
       e.preventDefault();
       const inputEl = document.getElementById('password-text-input');
-      const app = appConfigs[currentActiveAppId];
+      const app = appConfigs[currentActiveAppId] || {};
       const res = await authEngine.verifyCredential(currentActiveAppId, inputEl.value, 'password', app.customHash);
       handleAuthResult(res);
     });
@@ -452,7 +557,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function startBiometricScan() {
     const btn = document.getElementById('trigger-biometric-btn');
-    btn.innerHTML = '🧬';
+    if (btn) btn.innerHTML = '🧬';
     const res = await authEngine.triggerBiometricUnlock(currentActiveAppId);
     handleAuthResult(res);
   }
@@ -462,7 +567,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function handleAuthResult(res) {
     if (res.success) {
       lockInterceptModal.classList.remove('active-modal');
-      showAppSandboxContent(appConfigs[currentActiveAppId]);
+      showNotification('🔓 Application verified! Returning to app...', 'success');
     } else {
       const authBox = document.getElementById('auth-container');
       authBox.classList.remove('shake-animation');
@@ -472,8 +577,8 @@ document.addEventListener('DOMContentLoaded', async () => {
       if (res.lockedOut) {
         activateLockoutUIDisplay(currentActiveAppId);
       } else {
-        showNotification(`Incorrect lock entry! (${res.attemptsLeft} tries left before 30s lockout)`, 'danger');
-        if (appConfigs[currentActiveAppId].lockType === 'pin') {
+        showNotification(`Incorrect credential entry! (${res.attemptsLeft} tries left before 30s lockout)`, 'danger');
+        if (appConfigs[currentActiveAppId] && appConfigs[currentActiveAppId].lockType === 'pin') {
           renderPinDots(4, true);
           setTimeout(() => { currentPinInput = ''; renderPinDots(0); }, 500);
         }
@@ -491,7 +596,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     const progressFill = document.getElementById('lockout-progress-fill');
     
     lockoutBanner.style.display = 'flex';
-    showNotification('Too many failed attempts! App locked for 30 seconds.', 'danger');
+    showNotification('Too many failed attempts! Application locked for 30 seconds.', 'danger');
 
     authEngine.startLockoutTimerDisplay(
       appId,
@@ -502,170 +607,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       },
       () => {
         lockoutBanner.style.display = 'none';
-        setupActiveAuthenticatorUI(appConfigs[appId]);
-        showNotification('Lockout timer ended. You may try unlocking again.', 'success');
+        setupActiveAuthenticatorUI(appConfigs[appId] || { lockType: 'pin' });
+        showNotification('Lockout timer expired. You may attempt verification again.', 'success');
       }
     );
   }
 
-  document.getElementById('btn-close-intercept').addEventListener('click', () => {
-    lockInterceptModal.classList.remove('active-modal');
-  });
-
-  function showAppSandboxContent(app) {
-    const sandboxModal = document.getElementById('app-viewer-modal');
-    document.getElementById('viewer-app-name').innerText = app.name;
-    document.getElementById('viewer-app-icon-badge').innerText = app.icon;
-    document.getElementById('viewer-app-icon-badge').style.backgroundColor = app.color;
-    
-    const container = document.getElementById('viewer-dummy-content');
-
-    if (app.id === 'whatsapp') {
-      let savedNotes = JSON.parse(localStorage.getItem('applock_wa_notes') || '["🔒 Encrypted Note: Keep recovery passcode safe", "🔑 Vault PIN set to 2026"]');
-      container.innerHTML = `
-        <div style="display: flex; flex-direction: column; height: 440px; background: #0B141A; border-radius: 16px; overflow: hidden; border: 1px solid rgba(255,255,255,0.1);">
-          <div style="background: #202C33; padding: 14px 18px; display: flex; align-items: center; gap: 12px;">
-            <div style="width: 40px; height: 40px; border-radius: 50%; background: #25D366; display: flex; align-items: center; justify-content: center; font-size: 20px;">💬</div>
-            <div>
-              <h4 style="color: #FFF; font-size: 16px; margin: 0;">Secured Private Notes</h4>
-              <span style="color: #00A884; font-size: 12px;">● End-to-End Encrypted</span>
-            </div>
-          </div>
-          <div id="wa-notes-list" style="flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;">
-            ${savedNotes.map(n => `<div style="background: #005C4B; color: #E9EDEF; padding: 10px 14px; border-radius: 12px 12px 0 12px; max-width: 80%; align-self: flex-end; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);">${n}</div>`).join('')}
-          </div>
-          <div style="background: #202C33; padding: 12px; display: flex; gap: 10px;">
-            <input type="text" id="wa-input" class="glass-input" placeholder="Type a secure note or chat message..." style="font-size: 14px; padding: 10px 14px;">
-            <button id="wa-send-btn" class="btn-primary" style="padding: 10px 18px; background: #00A884;">Send</button>
-          </div>
-        </div>
-      `;
-      setTimeout(() => {
-        const sendBtn = document.getElementById('wa-send-btn');
-        const inputEl = document.getElementById('wa-input');
-        const listEl = document.getElementById('wa-notes-list');
-        sendBtn.onclick = () => {
-          if (!inputEl.value.trim()) return;
-          savedNotes.push(inputEl.value.trim());
-          localStorage.setItem('applock_wa_notes', JSON.stringify(savedNotes));
-          const msgDiv = document.createElement('div');
-          msgDiv.style.cssText = 'background: #005C4B; color: #E9EDEF; padding: 10px 14px; border-radius: 12px 12px 0 12px; max-width: 80%; align-self: flex-end; font-size: 14px; box-shadow: 0 2px 6px rgba(0,0,0,0.3);';
-          msgDiv.innerText = inputEl.value.trim();
-          listEl.appendChild(msgDiv);
-          inputEl.value = '';
-          listEl.scrollTop = listEl.scrollHeight;
-        };
-      }, 50);
-    } 
-    else if (app.id === 'banking') {
-      let balance = parseFloat(localStorage.getItem('applock_bank_bal') || '48250.00');
-      container.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 18px; color: #FFF;">
-          <div style="background: linear-gradient(135deg, #0071E3, #00C7FF); padding: 24px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,113,227,0.4);">
-            <span style="font-size: 13px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.8;">Total Net Worth Balance</span>
-            <h2 id="bank-bal-text" style="font-family: var(--font-heading); font-size: 36px; font-weight: 800; margin: 8px 0 4px;">$${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}</h2>
-            <span style="font-size: 12px; opacity: 0.9;">Account: **** **** **** 8829 (Checking)</span>
-          </div>
-
-          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px;">
-            <h4 style="margin-bottom: 12px; font-size: 15px;">Quick Money Transfer</h4>
-            <div style="display: flex; gap: 10px;">
-              <input type="number" id="bank-transfer-amt" class="glass-input" placeholder="Amount ($)..." style="font-size: 14px; padding: 10px;">
-              <button id="bank-send-btn" class="btn-primary" style="padding: 10px 18px;">Transfer</button>
-            </div>
-          </div>
-
-          <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 18px;">
-            <h4 style="margin-bottom: 10px; font-size: 15px;">Recent Activity</h4>
-            <div id="bank-tx-list" style="display: flex; flex-direction: column; gap: 8px; font-size: 13px; color: var(--text-secondary);">
-              <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(255,255,255,0.08);">
-                <span>Apple Store Purchase</span>
-                <span style="color: var(--color-danger); font-weight: 700;">-$299.00</span>
-              </div>
-              <div style="display: flex; justify-content: space-between; padding: 8px 0;">
-                <span>Payroll Direct Deposit</span>
-                <span style="color: var(--color-success); font-weight: 700;">+$3,500.00</span>
-              </div>
-            </div>
-          </div>
-        </div>
-      `;
-      setTimeout(() => {
-        const sendBtn = document.getElementById('bank-send-btn');
-        const amtInput = document.getElementById('bank-transfer-amt');
-        sendBtn.onclick = () => {
-          const val = parseFloat(amtInput.value);
-          if (isNaN(val) || val <= 0) return;
-          balance -= val;
-          localStorage.setItem('applock_bank_bal', balance.toString());
-          document.getElementById('bank-bal-text').innerText = `$${balance.toLocaleString('en-US', {minimumFractionDigits: 2})}`;
-          showNotification(`Transferred $${val.toFixed(2)} successfully!`, 'success');
-          amtInput.value = '';
-        };
-      }, 50);
-    }
-    else if (app.id === 'gallery') {
-      container.innerHTML = `
-        <div style="display: flex; flex-direction: column; gap: 16px;">
-          <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h4 style="color: #FFF; margin: 0;">Secured Photos (3 Albums)</h4>
-            <button class="btn-secondary" onclick="document.querySelector('[data-view=\'vault\']').click(); document.getElementById('btn-close-app-viewer').click();" style="font-size: 12px; padding: 6px 14px;">Open Vault ➔</button>
-          </div>
-          <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px;">
-            <div style="background: linear-gradient(135deg, #FF9F0A, #FF3B30); height: 120px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #FFF; box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer;">🏝️</div>
-            <div style="background: linear-gradient(135deg, #0071E3, #00C7FF); height: 120px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #FFF; box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer;">🏎️</div>
-            <div style="background: linear-gradient(135deg, #8A53FF, #E1306C); height: 120px; border-radius: 14px; display: flex; align-items: center; justify-content: center; font-size: 32px; color: #FFF; box-shadow: 0 6px 16px rgba(0,0,0,0.4); cursor: pointer;">📸</div>
-          </div>
-        </div>
-      `;
-    }
-    else if (app.id === 'instagram') {
-      let likes = parseInt(localStorage.getItem('applock_ig_likes') || '1420');
-      container.innerHTML = `
-        <div style="background: #000; border-radius: 16px; padding: 16px; border: 1px solid rgba(255,255,255,0.1); color: #FFF;">
-          <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 12px;">
-            <div style="width: 36px; height: 36px; border-radius: 50%; background: linear-gradient(135deg, #FF9F0A, #E1306C); padding: 2px;">
-              <div style="width: 100%; height: 100%; border-radius: 50%; background: #000; display: flex; align-items: center; justify-content: center; font-size: 16px;">👤</div>
-            </div>
-            <span style="font-weight: 700; font-size: 14px;">applock_official</span>
-          </div>
-          <div style="background: linear-gradient(135deg, #1A1E2E, #12141F); height: 200px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 54px; margin-bottom: 12px; border: 1px solid rgba(0,199,255,0.3);">
-            🛡️
-          </div>
-          <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
-            <button id="ig-like-btn" class="btn-secondary" style="border-color: #E1306C; color: #E1306C; padding: 6px 16px;">❤️ Like (<span id="ig-like-cnt">${likes}</span>)</button>
-            <span style="font-size: 12px; color: var(--text-muted);">2 hours ago</span>
-          </div>
-          <p style="font-size: 13px; color: var(--text-secondary); margin: 0;">Protected by App Lock zero-data-snooping security engine.</p>
-        </div>
-      `;
-      setTimeout(() => {
-        document.getElementById('ig-like-btn').onclick = () => {
-          likes += 1;
-          localStorage.setItem('applock_ig_likes', likes.toString());
-          document.getElementById('ig-like-cnt').innerText = likes.toString();
-        };
-      }, 50);
-    }
-    else {
-      container.innerHTML = `
-        <div style="padding: 30px; text-align: center; color: var(--text-secondary);">
-          <div style="font-size: 52px; margin-bottom: 16px;">${app.icon}</div>
-          <h3 style="color: #FFF; font-family: var(--font-heading); margin-bottom: 8px;">Active Protected Application: ${app.name}</h3>
-          <p style="font-size: 14px; max-width: 400px; margin: 0 auto 20px;">This application is active and protected under the App Lock security posture. Zero data snooping active.</p>
-          <div style="display: inline-block; background: rgba(52,199,89,0.15); color: var(--color-success); border: 1px solid var(--color-success); padding: 8px 18px; border-radius: 9999px; font-size: 13px; font-weight: 700;">
-            ✓ Real-Time Shield Armed
-          </div>
-        </div>
-      `;
-    }
-
-    sandboxModal.classList.add('active-modal');
+  const btnCloseIntercept = document.getElementById('btn-close-intercept');
+  if (btnCloseIntercept) {
+    btnCloseIntercept.addEventListener('click', () => {
+      lockInterceptModal.classList.remove('active-modal');
+    });
   }
-
-  document.getElementById('btn-close-app-viewer').addEventListener('click', () => {
-    document.getElementById('app-viewer-modal').classList.remove('active-modal');
-  });
 
   /* ==========================================================================
      Master Credentials Customizer Handlers
@@ -724,37 +677,50 @@ document.addEventListener('DOMContentLoaded', async () => {
      ========================================================================== */
   const recoveryModal = document.getElementById('recovery-modal');
 
-  document.getElementById('link-forgot-lock').addEventListener('click', () => {
-    document.getElementById('recovery-input-pass').value = '';
-    recoveryModal.classList.add('active-modal');
-  });
+  const linkForgot = document.getElementById('link-forgot-lock');
+  if (linkForgot) {
+    linkForgot.addEventListener('click', () => {
+      document.getElementById('recovery-input-pass').value = '';
+      recoveryModal.classList.add('active-modal');
+    });
+  }
 
-  document.getElementById('btn-close-recovery').addEventListener('click', () => {
-    recoveryModal.classList.remove('active-modal');
-  });
+  const btnCloseRecovery = document.getElementById('btn-close-recovery');
+  if (btnCloseRecovery) {
+    btnCloseRecovery.addEventListener('click', () => {
+      recoveryModal.classList.remove('active-modal');
+    });
+  }
 
-  document.getElementById('form-recovery').addEventListener('submit', async (e) => {
-    e.preventDefault();
-    const val = document.getElementById('recovery-input-pass').value;
-    const isMasterOk = await authEngine.verifyMasterRecovery(val);
-    
-    if (!isMasterOk) {
-      showNotification('Incorrect Master Emergency Recovery Password!', 'danger');
-      return;
-    }
+  const formRecovery = document.getElementById('form-recovery');
+  if (formRecovery) {
+    formRecovery.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const val = document.getElementById('recovery-input-pass').value;
+      const isMasterOk = await authEngine.verifyMasterRecovery(val);
+      
+      if (!isMasterOk) {
+        showNotification('Incorrect Master Emergency Recovery Password!', 'danger');
+        return;
+      }
 
-    recoveryModal.classList.remove('active-modal');
-    lockInterceptModal.classList.remove('active-modal');
+      recoveryModal.classList.remove('active-modal');
+      lockInterceptModal.classList.remove('active-modal');
 
-    if (confirm(`Master verification successful for ${appConfigs[currentActiveAppId].name}!\nWould you like to permanently turn OFF locking for this app? (OK = Disable Lock, Cancel = Just Open Now)`)) {
-      appConfigs[currentActiveAppId].locked = false;
-      saveConfigs();
-      renderAppProtectionList();
-      renderSandboxLauncher();
-      showNotification(`Lock turned off for ${appConfigs[currentActiveAppId].name}.`, 'warning');
-    }
-    showAppSandboxContent(appConfigs[currentActiveAppId]);
-  });
+      const targetApp = appConfigs[currentActiveAppId];
+      const appName = targetApp ? targetApp.name : currentActiveAppId;
+
+      if (confirm(`Master verification successful for ${appName}!\nWould you like to turn OFF real-time locking for this application? (OK = Disable Lock, Cancel = Unblock Once)`)) {
+        if (targetApp) {
+          targetApp.locked = false;
+          saveConfigs(true);
+        }
+        showNotification(`Lock turned off for ${appName}.`, 'warning');
+      } else {
+        showNotification(`Temporary unblock granted for ${appName}.`, 'success');
+      }
+    });
+  }
 
   /* ==========================================================================
      Scenario Profiles Switcher
@@ -770,25 +736,22 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
 
     if (profileKey === 'work') {
-      appConfigs['instagram'].locked = true;
-      appConfigs['tiktok'].locked = true;
-      appConfigs['gmail'].locked = false;
-      showNotification('Work Profile Engaged: Social Media & Gaming Apps automatically locked.', 'success');
+      if (appConfigs['com.instagram.android']) appConfigs['com.instagram.android'].locked = true;
+      if (appConfigs['com.google.android.gm']) appConfigs['com.google.android.gm'].locked = false;
+      showNotification('Work Profile Engaged: Social & Messaging apps locked; Productivity email opened.', 'success');
     } else if (profileKey === 'home') {
-      appConfigs['gmail'].locked = true;
-      appConfigs['banking'].locked = true;
-      appConfigs['instagram'].locked = false;
-      showNotification('Home Profile Engaged: Work Email and Financial Apps locked.', 'success');
+      if (appConfigs['com.google.android.gm']) appConfigs['com.google.android.gm'].locked = true;
+      if (appConfigs['net.one97.paytm']) appConfigs['net.one97.paytm'].locked = true;
+      if (appConfigs['com.instagram.android']) appConfigs['com.instagram.android'].locked = false;
+      showNotification('Home Profile Engaged: Work Email and Financial tools locked.', 'success');
     } else if (profileKey === 'guest') {
       Object.keys(appConfigs).forEach(k => appConfigs[k].locked = true);
-      showNotification('Guest Profile Engaged: Maximum security! EVERY application is locked.', 'warning');
+      showNotification('Guest Profile Engaged: Maximum security! EVERY installed app is locked.', 'warning');
     } else {
       appConfigs = JSON.parse(JSON.stringify(defaultAppDirectory));
       showNotification('Default Profile Restored.', 'success');
     }
-    saveConfigs();
-    renderAppProtectionList();
-    renderSandboxLauncher();
+    saveConfigs(true);
   }
 
   profileCards.forEach(card => {
@@ -797,24 +760,18 @@ document.addEventListener('DOMContentLoaded', async () => {
   applyProfile(activeProfile);
 
   /* ==========================================================================
-     New App Installation Detection Simulation & Uninstall Shield
+     Fail-Safe Uninstall Release Shield
      ========================================================================== */
-  document.getElementById('btn-simulate-new-app').addEventListener('click', () => {
-    const newAppName = Math.random() > 0.5 ? 'Snapchat (Social)' : 'Robinhood (Finance)';
-    if (confirm(`🚨 NEW APPLICATION INSTALLED: ${newAppName}\n\nWould you like App Lock to immediately secure this new app with Pattern/PIN Lock right now?`)) {
-      showNotification(`App Lock protection successfully activated for ${newAppName}!`, 'success');
-    }
-  });
-
-  document.getElementById('btn-instant-uninstall').addEventListener('click', () => {
-    if (confirm('🚨 DEACTIVATE APP LOCK & RELEASE ALL APPS?\n\nPer security policy, uninstalling or disabling the security engine instantly releases all app restrictions without asking for further permissions so you never lose access to your apps.')) {
-      Object.keys(appConfigs).forEach(k => appConfigs[k].locked = false);
-      saveConfigs();
-      renderAppProtectionList();
-      renderSandboxLauncher();
-      showNotification('All applications instantly unlocked and released!', 'warning');
-    }
-  });
+  const btnInstantUninstall = document.getElementById('btn-instant-uninstall');
+  if (btnInstantUninstall) {
+    btnInstantUninstall.addEventListener('click', () => {
+      if (confirm('🚨 DEACTIVATE APP LOCK & RELEASE ALL APPS?\n\nPer security policy, releasing all locks instantly turns off background interception without demanding passwords so you never lose access to your phone apps.')) {
+        Object.keys(appConfigs).forEach(k => appConfigs[k].locked = false);
+        saveConfigs(true);
+        showNotification('All real-time app locks instantly released and turned off!', 'warning');
+      }
+    });
+  }
 
   /* ==========================================================================
      Encrypted Photo / Video Media Vault UI Handlers
@@ -897,11 +854,16 @@ document.addEventListener('DOMContentLoaded', async () => {
     mediaViewer.classList.add('active-viewer');
   }
 
-  document.getElementById('btn-close-viewer').addEventListener('click', () => {
-    mediaViewer.classList.remove('active-viewer');
-    mediaVault.revokeBlobUrl(activeBlobUrl);
-    activeBlobUrl = null;
-  });
+  const btnCloseViewer = document.getElementById('btn-close-viewer');
+  if (btnCloseViewer) {
+    btnCloseViewer.addEventListener('click', () => {
+      mediaViewer.classList.remove('active-viewer');
+      if (activeBlobUrl) {
+        mediaVault.revokeBlobUrl(activeBlobUrl);
+        activeBlobUrl = null;
+      }
+    });
+  }
 
   /* ==========================================================================
      Apple-Style Floating Toast Notification Engine
@@ -933,6 +895,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     }, 4500);
   }
 
+  syncWithNativeEngine();
   renderAppProtectionList();
-  renderSandboxLauncher();
 });
