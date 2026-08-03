@@ -169,12 +169,21 @@ header.navbar {
 /* Tab Navigation Bar */
 .nav-tabs {
   display: flex;
+  align-items: center;
   background: var(--bg-glass-panel);
   border: 1px solid var(--border-glass);
   padding: 6px;
   border-radius: var(--radius-pill);
   gap: 4px;
   box-shadow: var(--shadow-sm);
+  max-width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.nav-tabs::-webkit-scrollbar {
+  display: none;
 }
 
 .nav-tab {
@@ -191,6 +200,8 @@ header.navbar {
   display: flex;
   align-items: center;
   gap: 8px;
+  flex-shrink: 0;
+  white-space: nowrap;
 }
 .nav-tab svg {
   width: 16px;
@@ -1293,7 +1304,16 @@ input:checked + .slider-pill:before {
 }
 
 /* Responsive Rules for Small Devices & Tablets */
+@media (max-width: 1200px) {
+  .logo-badge {
+    display: none;
+  }
+}
+
 @media (max-width: 992px) {
+  .app-wrapper {
+    padding: 0 16px 110px;
+  }
   .bento-grid {
     grid-template-columns: 1fr;
   }
@@ -1302,11 +1322,11 @@ input:checked + .slider-pill:before {
   }
   .hero-banner {
     flex-direction: column;
-    padding: 36px;
+    padding: 32px 20px;
     text-align: center;
   }
   .hero-visual {
-    margin-top: 36px;
+    margin-top: 32px;
     width: 100%;
   }
   .nav-tabs {
@@ -1314,14 +1334,46 @@ input:checked + .slider-pill:before {
     bottom: 16px;
     left: 50%;
     transform: translateX(-50%);
-    width: calc(100% - 32px);
-    justify-content: space-around;
-    z-index: 1000;
+    width: calc(100% - 24px);
+    max-width: 600px;
+    justify-content: flex-start;
+    padding: 8px 10px;
+    background: rgba(15, 18, 29, 0.95);
+    backdrop-filter: blur(30px);
+    -webkit-backdrop-filter: blur(30px);
+    border: 1px solid rgba(0, 199, 255, 0.4);
+    box-shadow: 0 15px 50px rgba(0, 0, 0, 0.9);
+    z-index: 100000;
   }
   .header-actions .btn-primary span {
     display: none;
   }
   .apps-grid {
     grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  header.navbar {
+    padding: 14px 0;
+    margin-bottom: 24px;
+  }
+  .logo-text {
+    font-size: 22px;
+  }
+  .hero-title {
+    font-size: 34px;
+  }
+  .nav-tab {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+  .hero-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+  .hero-actions .btn-primary, .hero-actions .btn-secondary {
+    width: 100%;
+    justify-content: center;
   }
 }
