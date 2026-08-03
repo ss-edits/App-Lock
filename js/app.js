@@ -28,26 +28,41 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeProfile = localStorage.getItem('applock_active_profile') || 'default';
 
   /* ==========================================================================
-     PWA Offline Install & Download Handler
+     PWA Offline Install & Native APK Download Modal Handlers
      ========================================================================== */
-  const triggerInstall = () => {
-    if (deferredInstallPrompt) {
-      deferredInstallPrompt.prompt();
-      deferredInstallPrompt.userChoice.then((choice) => {
-        if (choice.outcome === 'accepted') {
-          showNotification('App Lock installed successfully to Home Screen!', 'success');
-        }
-        deferredInstallPrompt = null;
-      });
-    } else {
-      alert("🛡️ DOWNLOAD / INSTALL APP LOCK PWA\n\nTo install App Lock as an offline standalone application on your device:\n\n📱 Android (Chrome / Edge): Tap your browser's menu (3 dots at top right) and select 'Install App' or 'Add to Home screen'.\n\n🍏 iPhone / iPad (Safari): Tap the Share icon (box with arrow) at the bottom of Safari and select 'Add to Home Screen'.\n\n💻 Desktop (Chrome / Edge): Click the install icon inside your URL address bar!");
-    }
+  const nativeModal = document.getElementById('native-download-modal');
+  const btnCloseNative = document.getElementById('btn-close-native-download');
+  const btnTriggerPwa = document.getElementById('btn-trigger-pwa-prompt');
+
+  const openNativeModal = () => {
+    if (nativeModal) nativeModal.classList.add('active-modal');
   };
 
   const btnNav = document.getElementById('btn-pwa-install');
   const btnHero = document.getElementById('hero-btn-pwa-install');
-  if (btnNav) btnNav.onclick = triggerInstall;
-  if (btnHero) btnHero.onclick = triggerInstall;
+  if (btnNav) btnNav.onclick = openNativeModal;
+  if (btnHero) btnHero.onclick = openNativeModal;
+
+  if (btnCloseNative) {
+    btnCloseNative.onclick = () => nativeModal.classList.remove('active-modal');
+  }
+
+  if (btnTriggerPwa) {
+    btnTriggerPwa.onclick = () => {
+      if (deferredInstallPrompt) {
+        deferredInstallPrompt.prompt();
+        deferredInstallPrompt.userChoice.then((choice) => {
+          if (choice.outcome === 'accepted') {
+            showNotification('App Lock native standalone app installed!', 'success');
+          }
+          deferredInstallPrompt = null;
+        });
+      } else {
+        showNotification('Launching Standalone App Installation...', 'info');
+        alert("📱 INSTALL APP LOCK STANDALONE APP\n\nTo install App Lock as a standalone native app on your phone:\n\n1. Tap your browser's menu (3 dots at top right in Chrome/Edge, or Share button in Safari).\n2. Tap 'Install App' or 'Add to Home screen'.\n\nApp Lock will install as a native icon in your App Drawer!");
+      }
+    };
+  }
 
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();

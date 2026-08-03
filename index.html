@@ -67,7 +67,7 @@
       <div class="header-actions">
         <button id="btn-pwa-install" class="btn-primary">
           <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>Download App Lock PWA</span>
+          <span>Install App Lock Native App</span>
         </button>
       </div>
     </header>
@@ -94,7 +94,7 @@
           <div class="hero-actions">
             <button id="hero-btn-pwa-install" class="btn-primary" style="background: linear-gradient(135deg, #00C7FF 0%, #8A53FF 100%); font-size: 16px; padding: 14px 28px; box-shadow: 0 0 30px rgba(0,199,255,0.55);">
               <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Download & Install App Lock PWA</span>
+              <span>Install App Lock Native App</span>
             </button>
             <button class="btn-secondary" onclick="document.querySelector('[data-view=\'sandbox\']').click();">
               Launch Test Launcher ➔
@@ -566,6 +566,54 @@
   <div id="media-viewer-modal" class="media-viewer-modal">
     <button id="btn-close-viewer" class="btn-close-viewer">✕</button>
     <div id="viewer-content-box" class="viewer-content-box"></div>
+  </div>
+
+  <!-- Native App Download & APK Package Modal -->
+  <div id="native-download-modal" class="modal-overlay">
+    <div class="lock-interception-card" style="max-width: 520px; align-items: stretch;">
+      <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 16px; margin-bottom: 20px;">
+        <div style="display: flex; align-items: center; gap: 12px;">
+          <div style="width: 44px; height: 44px; border-radius: 14px; background: var(--accent-gradient); display: flex; align-items: center; justify-content: center; font-size: 22px; color: #FFF;">📱</div>
+          <div>
+            <h3 style="font-family: var(--font-heading); font-size: 20px; font-weight: 800; color: #FFF;">Install App Lock Native App</h3>
+            <span style="font-size: 12px; color: var(--color-success); font-weight: 700;">Zero Data Snooping • Native Android & Standalone</span>
+          </div>
+        </div>
+        <button id="btn-close-native-download" class="btn-secondary" style="padding: 6px 14px; font-size: 12px;">✕</button>
+      </div>
+
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        
+        <!-- Option 1: Native App Install -->
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(0, 199, 255, 0.3); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 16px; color: #FFF;">⚡ Instant Standalone App Install</span>
+            <span class="badge-encrypted">1-Click Install</span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            Installs App Lock directly to your device as a standalone native app icon in your App Drawer and Home Screen. Launches fullscreen without browser bars.
+          </p>
+          <button id="btn-trigger-pwa-prompt" class="btn-primary" style="justify-content: center; width: 100%; margin-top: 4px;">
+            🚀 Install Standalone App Now
+          </button>
+        </div>
+
+        <!-- Option 2: Android APK Package -->
+        <div style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 16px; padding: 18px; display: flex; flex-direction: column; gap: 10px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 800; font-size: 16px; color: #FFF;">🤖 Download Signed Android APK (.apk)</span>
+            <span class="badge-encrypted" style="background: rgba(255, 159, 10, 0.2); color: var(--color-warning);">APK Package</span>
+          </div>
+          <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.5;">
+            Generate or download a signed Android <code>.apk</code> package for direct sideloading or Play Store installation using Microsoft PWABuilder.
+          </p>
+          <a href="https://www.pwabuilder.com/reportcard?url=https://ss-edits.github.io/App-Lock/" target="_blank" class="btn-secondary" style="text-align: center; text-decoration: none; display: flex; justify-content: center; align-items: center; width: 100%; border-color: var(--accent-cyan); color: var(--accent-cyan);">
+            📦 Generate & Download APK File on PWABuilder ➔
+          </a>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <!-- Application Logic & Crypto Engines -->
