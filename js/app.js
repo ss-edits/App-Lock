@@ -28,15 +28,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeProfile = localStorage.getItem('applock_active_profile') || 'default';
 
   /* ==========================================================================
-     PWA Offline Install Handle
+     PWA Offline Install & Download Handler
      ========================================================================== */
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredInstallPrompt = e;
-    const downloadBtn = document.getElementById('btn-pwa-install');
-    if (downloadBtn) {
-      downloadBtn.style.display = 'flex';
-      downloadBtn.onclick = () => {
+  const downloadBtn = document.getElementById('btn-pwa-install');
+  if (downloadBtn) {
+    downloadBtn.onclick = () => {
+      if (deferredInstallPrompt) {
         deferredInstallPrompt.prompt();
         deferredInstallPrompt.userChoice.then((choice) => {
           if (choice.outcome === 'accepted') {
@@ -44,8 +41,15 @@ document.addEventListener('DOMContentLoaded', async () => {
           }
           deferredInstallPrompt = null;
         });
-      };
-    }
+      } else {
+        alert("🛡️ DOWNLOAD / INSTALL APP LOCK PWA\n\nTo install App Lock as an offline standalone application on your device:\n\n📱 Android (Chrome / Edge): Tap your browser's menu (3 dots at top right) and select 'Install App' or 'Add to Home screen'.\n\n🍏 iPhone / iPad (Safari): Tap the Share icon (box with arrow) at the bottom of Safari and select 'Add to Home Screen'.\n\n💻 Desktop (Chrome / Edge): Click the install icon inside your URL address bar!");
+      }
+    };
+  }
+
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredInstallPrompt = e;
   });
 
   /* ==========================================================================
